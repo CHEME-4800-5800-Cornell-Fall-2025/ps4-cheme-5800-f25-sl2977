@@ -79,6 +79,12 @@ function solve(model::MySimulatedAnnealingMinimumVariancePortfolioAllocationProb
             # generate candidate solution by perturbing current weights
             candidate_w = current_w .+ β .* randn(length(current_w));
             
+            # project candidate to ensure non-negativity
+            candidate_w = max.(candidate_w, 1e-8);
+
+            # normalize to sum to approximately 1 to help satisfy constraint
+            candidate_w = candidate_w ./ sum(candidate_w);
+
             # compute objective value for candidate
             candidate_f = _objective_function(candidate_w, ḡ, Σ̂, R, μ, ρ);
             
