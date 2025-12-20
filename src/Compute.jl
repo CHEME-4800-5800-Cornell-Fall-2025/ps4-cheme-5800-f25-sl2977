@@ -14,7 +14,7 @@ function _objective_function(w::Array{Float64,1}, ḡ::Array{Float64,1},
     f = w'*(Σ̂*w) + (1/(2*ρ))*((sum(w) - 1.0)^2 + (transpose(ḡ)*w - R)^2) - (1/μ)*sum(_safe_log.(w));
 
     # TODO: This version of the objective function does NOT have the barrier term
-    # f = w'*(Σ̂*w) + (1/(2*ρ))*((sum(w) - 1.0)^2 + (transpose(ḡ)*w - R)^2);
+    #f = w'*(Σ̂*w) + (1/(2*ρ))*((sum(w) - 1.0)^2 + (transpose(ḡ)*w - R)^2);
 
 
     return f;
@@ -73,9 +73,33 @@ function solve(model::MySimulatedAnnealingMinimumVariancePortfolioAllocationProb
     
         accepted_counter = 0; 
         
-        # TODO: Implement simulated annealing logic here -
-        throw(ErrorException("Oooops! Simulated annealing logic not yet implemented!!"));
-
+        # main simulated annealing loop
+        for iteration_index in 1:KL
+            
+            # generate candidate solution by perturbing current weights
+            candidate_w = current_w .+ β .* randn(length(current_w));
+            
+            # compute objective value for candidate
+            candidate_f = _objective_function(candidate_w, ḡ, Σ̂, R, μ, ρ);
+            
+            # calculate change in objective
+            delta_f = candidate_f - current_f;
+            
+            # metropolis acceptance criterion
+            if delta_f < 0 || rand() < exp(-delta_f / T)
+                # accept the candidate
+                current_w = candidate_w;
+                current_f = candidate_f;
+                accepted_counter += 1;
+                
+                # update best solution if this is better
+                if current_f < f_best
+                    w_best = current_w;
+                    f_best = current_f;
+                end
+            end
+        end
+        
         # update KL -
         fraction_accepted = accepted_counter/KL; # what is the fraction of accepted moves
         
