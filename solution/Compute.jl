@@ -78,7 +78,7 @@ function solve(model::MySimulatedAnnealingMinimumVariancePortfolioAllocationProb
             candidate_w = current_w + β * randn(length(w));
             
             # TODO: If you want to get rid of the barrier term, comment out the next line
-            # candidate_w = max.(0.0, candidate_w); # check non-negativity here, no barriers
+            #candidate_w = max.(0.0, candidate_w); # check non-negativity here, no barriers
 
             # compute the objective function at the candidate solution -
             candidate_f = _objective_function(candidate_w, ḡ, Σ̂, R, μ, ρ);
